@@ -1,0 +1,15 @@
+注意事项：
+
+1：编译脚本MakeIVSSDK.sh上传到linux测试机后，需要修改脚本文件属性为可执行，并执行dos2unix进行转换，否则脚本无法运行
+
+2: 编译脚本MakeIVSSDK.sh增加了os编译选项参数，目前支持suse10和suse11两种参数值，使用时需要带上关键字os来指示，例如：./MakeIVSSDK.sh os suse10 或 ./MakeIVSSDK.sh os suse11。默认参数值为suse11
+
+3：编译脚本MakeIVSSDK.sh增加了debug编译和release编译选项参数，若需要编译release版本，执行命令./MakeIVSSDK.sh ver release；若需要编译debug版本，执行命令./MakeIVSSDK.sh 或 ./MakeIVSSDK.sh ver debug；
+
+4：运行程序前，需要设置LD_LIBRARY_PATH变量，设置方法：export LD_LIBRARY_PATH=测试机上的IVS_Linux_Demo/lib:$LD_LIBRARY_PATH；
+
+5："IVS_SDK\build\linux"下的IVS_SDK.h文件是Linux版本对外开放的接口文件，里面已经将暂时不开放的接口声明删除。对外发布的头文件以此为准，打包时不再从IVS_COMMON下拷贝IVS_SDK.h；
+
+6：R3版本IVS_BP、IVS_COMMON已移至trunk\platform目录下，向Linux测试机拷贝时须保持原目录结构，不再与IVS_SDK、IVS_MP同目录
+
+7：已修改MakeIVSSDK.sh，在make IVS_MP和IVS_SDK之前先Make rtsp_client

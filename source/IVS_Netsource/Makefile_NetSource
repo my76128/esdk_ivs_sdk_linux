@@ -1,0 +1,99 @@
+#                     MAKE MACRO DEFINATION
+
+os = suse11
+ROOT =.
+OBJDIR  = $(ROOT)/NetSourceObj
+BINDIR	= $(ROOT)/build/linux
+LIBDIR	= $(ROOT)/lib
+ifeq ($(os),suse11)
+LIBDIR2	= $(ROOT)/../../../platform/IVS_BP/release/new/linux
+else
+LIBDIR2	= $(ROOT)/../../../platform/IVS_BP/release/new/linux/suse10
+endif
+
+INCDIR1 = $(ROOT)/inc
+INCDIR2 = $(ROOT)/inc/common
+INCDIR3 = $(ROOT)/IVS_NetSource/inc
+INCDIR4 = $(ROOT)/../../../platform/IVS_COMMON/inc
+INCDIR5 = $(ROOT)/../../../platform/IVS_MP/IVS_MP_LINUX/inc
+
+SOURCEDIR0 = $(ROOT)/inc/common/BaseThread
+SOURCEDIR1 = $(ROOT)/inc/common/log
+SOURCEDIR2 = $(ROOT)/inc/common/Timer
+SOURCEDIR3 = $(ROOT)/IVS_NetSource/src
+SOURCEDIR4 = $(ROOT)/IVS_NetSource/src/NVSTimer
+
+ver = debug
+ifeq ($(ver),debug)
+CCFlag =  -O -g -w -fPIC -c -fmessage-length=0
+else
+CCFlag =  -O2 -w -fPIC -c -fmessage-length=0
+endif
+
+CC = g++
+LINK = g++
+LINKFlag = -shared
+PRJNAME = IVS_NetSource
+
+PROGRAM = lib$(PRJNAME).so
+
+INCLUDES = -I$(SOURCEDIR0) -I$(SOURCEDIR1) -I$(SOURCEDIR2) -I$(SOURCEDIR3) -I$(SOURCEDIR4) \
+-I$(INCDIR1) -I$(INCDIR2) -I$(INCDIR3) -I$(INCDIR4) -I$(INCDIR5)
+
+LIBDIRS = -L$(LIBDIR) -L$(LIBDIR2)
+LIBS = -lpthread
+MACROS = -DUE_TERM_ROUTE -DDEBUG -DMODULE_NETSOURCE_NAMESPACE
+RM = rm -f
+
+#                       SOURCE FILES
+SOURCE0 := $(wildcard $(SOURCEDIR0)/*.cpp)
+OBJ0 := $(patsubst $(SOURCEDIR0)/%.cpp,$(OBJDIR)/%.o,$(SOURCE0))
+SOURCE1 := $(wildcard $(SOURCEDIR1)/*.cpp)
+OBJ1 := $(patsubst $(SOURCEDIR1)/%.cpp,$(OBJDIR)/%.o,$(SOURCE1))
+SOURCE2 := $(wildcard $(SOURCEDIR2)/*.cpp)
+OBJ2 := $(patsubst $(SOURCEDIR2)/%.cpp,$(OBJDIR)/%.o,$(SOURCE2))
+SOURCE3 := $(wildcard $(SOURCEDIR3)/*.cpp)
+OBJ3 := $(patsubst $(SOURCEDIR3)/%.cpp,$(OBJDIR)/%.o,$(SOURCE3))
+SOURCE4 := $(wildcard $(SOURCEDIR4)/*.cpp)
+OBJ4 := $(patsubst $(SOURCEDIR4)/%.cpp,$(OBJDIR)/%.o,$(SOURCE4))
+
+OBJS := $(OBJ0) $(OBJ1) $(OBJ2) $(OBJ3) $(OBJ4)
+
+$(PROGRAM):  $(OBJS)
+	$(LINK) $(MACROS) -o $(PRJNAME)/$(PROGRAM) $(OBJS) $(LINKFlag) $(LIBS) $(LIBDIRS)
+$(OBJ0): $(OBJDIR)/%.o : $(SOURCEDIR0)/%.cpp
+	$(CC) -c $(MACROS) $(CCFlag) $(INCLUDES) $< -o $@ 
+$(OBJ1): $(OBJDIR)/%.o : $(SOURCEDIR1)/%.cpp
+	$(CC) -c $(MACROS) $(CCFlag) $(INCLUDES) $< -o $@
+$(OBJ2): $(OBJDIR)/%.o : $(SOURCEDIR2)/%.cpp
+	$(CC) -c $(MACROS) $(CCFlag) $(INCLUDES) $< -o $@	
+$(OBJ3): $(OBJDIR)/%.o : $(SOURCEDIR3)/%.cpp
+	$(CC) -c $(MACROS) $(CCFlag) $(INCLUDES) $< -o $@
+$(OBJ4): $(OBJDIR)/%.o : $(SOURCEDIR4)/%.cpp
+	$(CC) -c $(MACROS) $(CCFlag) $(INCLUDES) $< -o $@
+	
+clean::
+	$(RM) $(OBJDIR)/*
+	$(RM) $(ROOT)/libIVS_NetSource.so
+	
+#	$(RM) $(BINDIR)/*
+cleanpart::
+	$(RM) $(OBJDIR)/*.o
+dep: delete_previous_depend $(OBJS:%.o=%_dep)
+delete_previous_depend:
+	$(RM) -f depend
+$(OBJ0:%.o=%_dep): $(OBJDIR)/%_dep : $(SOURCEDIR0)/%.cpp
+	$(CC) -MM  -MT '$(OBJDIR)/$*.o' $(CCFlag) $< $(INCLUDES) >>depend
+$(OBJ1:%.o=%_dep): $(OBJDIR)/%_dep : $(SOURCEDIR1)/%.cpp
+	$(CC) -MM  -MT '$(OBJDIR)/$*.o' $(CCFlag) $< $(INCLUDES) >>depend
+$(OBJ2:%.o=%_dep): $(OBJDIR)/%_dep : $(SOURCEDIR2)/%.cpp
+	$(CC) -MM  -MT '$(OBJDIR)/$*.o' $(CCFlag) $< $(INCLUDES) >>depend
+$(OBJ3:%.o=%_dep): $(OBJDIR)/%_dep : $(SOURCEDIR3)/%.cpp
+	$(CC) -MM  -MT '$(OBJDIR)/$*.o' $(CCFlag) $< $(INCLUDES) >>depend
+$(OBJ4:%.o=%_dep): $(OBJDIR)/%_dep : $(SOURCEDIR4)/%.cpp
+	$(CC) -MM  -MT '$(OBJDIR)/$*.o' $(CCFlag) $< $(INCLUDES) >>depend
+	
+-include depend 
+copy:
+#copy libIVS_NetSource.so
+	cp $(ROOT)/IVS_NetSource/libIVS_NetSource.so $(ROOT)/build/linux/
